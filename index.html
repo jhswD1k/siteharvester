@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Permission and Data Test Page</title>
+</head>
+<body>
+    <h1>Permission & Info Gathering Test</h1>
+    <button onclick="requestPermissions()">Request Permissions</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function requestPermissions() {
+            let output = document.getElementById('output');
+            let data = {};
+
+            // 1. Try to get geolocation (shows a permission popup)
+            try {
+                await new Promise((resolve) => {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            data.location = {
+                                latitude: pos.coords.latitude,
+                                longitude: pos.coords.longitude
+                            };
+                            resolve();
+                        },
+                        err => {
+                            data.location = 'Denied or Unavailable';
+                            resolve();
+                        }
+                    );
+                });
+            } catch (e) {
+                data.location = 'Error';
+            }
+
+            // 2. Try to access webcam and mic (shows permission popup)
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                data.camera_mic = 'Access granted';
+            } catch {
+                data.camera_mic = 'Denied';
+            }
+
+            // 3. Device fingerprint info (no permission needed)
+            data.screen = {
+                width: screen.width,
+                height: screen.height,
+                colorDepth: screen.colorDepth
+            };
+            data.userAgent = navigator.userAgent;
+            data.language = navigator.language;
+            data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            // 4. Show the collected data in the page
+            output.textContent = JSON.stringify(data, null, 2);
+
+            // 5. Send to server (optional — must be running server.js to work)
+            try {
+                await fetch('http://localhost:3000/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+            } catch (err) {
+                console.warn('Failed to send data to server:', err);
+            }
+        }
+    </script>
+</body>
+</html>
